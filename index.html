@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangalore Wealth Ladder</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0f0a;
+  --bg2: #111811;
+  --bg3: #161e16;
+  --panel: #1a221a;
+  --border: rgba(74,160,74,0.15);
+  --border2: rgba(74,160,74,0.3);
+  --green: #4aa04a;
+  --green2: #6dc96d;
+  --green3: #a8e6a8;
+  --gold: #d4a843;
+  --gold2: #f0c96a;
+  --amber: #c47a2a;
+  --red: #c45050;
+  --blue: #4a90c4;
+  --teal: #3aaa8a;
+  --text: #e8f0e8;
+  --text2: #9ab89a;
+  --text3: #607060;
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;}
+
+/* Subtle grid background */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(74,160,74,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(74,160,74,0.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;
+}
+
+.container{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;position:relative;z-index:1;}
+
+/* Header */
+.header{text-align:center;margin-bottom:3rem;}
+.header-kicker{font-family:var(--font-mono);font-size:11px;letter-spacing:0.2em;color:var(--green);text-transform:uppercase;margin-bottom:0.75rem;}
+.header h1{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.2rem);color:var(--text);line-height:1.1;margin-bottom:0.5rem;}
+.header h1 em{color:var(--green2);font-style:italic;}
+.header p{color:var(--text2);font-size:14px;max-width:500px;margin:0 auto;}
+
+/* Main layout */
+.main-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+@media(max-width:800px){.main-grid{grid-template-columns:1fr;}}
+
+/* Panels */
+.panel{background:var(--panel);border:0.5px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green2),transparent);opacity:0.4;}
+.panel-title{font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:1.25rem;}
+
+/* Input group */
+.input-group{margin-bottom:1.25rem;}
+.input-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.input-label span{font-family:var(--font-mono);font-size:13px;color:var(--gold2);font-weight:500;}
+.input-field{width:100%;background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;transition:border-color .2s;}
+.input-field:focus{border-color:var(--green);}
+.input-field::placeholder{color:var(--text3);}
+.slider-wrap{position:relative;}
+.slider{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--bg2);outline:none;margin-top:8px;}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--green2);border:2px solid var(--bg);cursor:pointer;box-shadow:0 0 10px rgba(109,201,109,0.4);}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;}
+
+/* Method chips */
+.method-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;}
+.method-chip{font-size:11px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .2s;font-family:var(--font-body);background:transparent;}
+.method-chip:hover{border-color:var(--green);color:var(--green3);}
+.method-chip.active{background:var(--green);border-color:var(--green);color:#0a0f0a;font-weight:600;}
+
+/* Calculate button */
+.calc-btn{width:100%;padding:14px;background:var(--green);border:none;border-radius:12px;color:#0a0f0a;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:0.02em;margin-top:0.5rem;}
+.calc-btn:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(74,160,74,0.3);}
+.calc-btn:active{transform:translateY(0);}
+
+/* Tree canvas panel */
+.tree-panel{background:var(--panel);border:0.5px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;min-height:340px;}
+.tree-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green2),transparent);opacity:0.4;}
+#treeCanvas{display:block;max-width:100%;}
+
+/* Results section */
+.results-section{display:none;}
+.results-section.visible{display:block;animation:fadeUp 0.5s ease;}
+
+/* Method cards grid */
+.method-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.method-card{background:var(--panel);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem;position:relative;overflow:hidden;transition:border-color .2s;}
+.method-card:hover{border-color:var(--border2);}
+.method-card.highlight{border-color:var(--green);box-shadow:0 0 20px rgba(74,160,74,0.1);}
+.mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;}
+.mc-name{font-size:13px;font-weight:600;color:var(--text);}
+.mc-badge{font-family:var(--font-mono);font-size:10px;padding:3px 8px;border-radius:6px;letter-spacing:0.05em;}
+.badge-green{background:rgba(74,160,74,0.15);color:var(--green2);}
+.badge-amber{background:rgba(196,122,42,0.15);color:var(--gold2);}
+.badge-red{background:rgba(196,80,80,0.15);color:#e88;}
+.badge-blue{background:rgba(74,144,196,0.15);color:#8bc4f0;}
+.mc-final{font-family:var(--font-mono);font-size:22px;font-weight:500;color:var(--green2);margin-bottom:4px;}
+.mc-gain{font-size:12px;color:var(--text2);}
+.mc-gain span{color:var(--gold2);}
+
+/* Ladder bar */
+.ladder-bar{margin-top:1rem;}
+.ladder-label{font-size:11px;color:var(--text3);margin-bottom:5px;font-family:var(--font-mono);}
+.ladder-track{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:2px;}
+.ladder-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(0.22,1,0.36,1);}
+.ladder-milestones{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.milestone{font-family:var(--font-mono);font-size:10px;padding:2px 7px;border-radius:4px;border:0.5px solid var(--border2);color:var(--text3);}
+.milestone.reached{border-color:var(--green);color:var(--green2);}
+
+/* Split donut / breakdown */
+.split-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.split-color{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.split-label{font-size:12px;color:var(--text2);flex:1;}
+.split-val{font-family:var(--font-mono);font-size:12px;color:var(--text);}
+
+/* Big summary */
+.summary-panel{background:var(--panel);border:0.5px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+.summary-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);opacity:0.5;}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;}
+.stat-box{text-align:center;}
+.stat-num{font-family:var(--font-display);font-size:1.8rem;line-height:1;}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);letter-spacing:0.05em;}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes countUp{from{opacity:0;}to{opacity:1;}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+.pulsing{animation:pulse 2s ease-in-out infinite;}
+
+/* Bangalore tag */
+.blr-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;color:var(--text3);padding:4px 10px;border:0.5px solid var(--border);border-radius:20px;margin-bottom:1.5rem;}
+.blr-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1.5s ease-in-out infinite;}
+
+/* Tooltip */
+.tooltip-text{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-kicker">Bangalore · Wealth Engine · 2025</div>
+    <h1>Grow your <em>₹10L</em><br>into a fortune</h1>
+    <p style="margin-top:8px;">See exactly how each investment method turns your capital into wealth — with Bangalore's growth rates.</p>
+  </div>
+
+  <div class="blr-tag" style="margin:0 auto 1.5rem;display:flex;width:fit-content;">
+    <span class="blr-dot"></span>
+    Live rate estimates · Bangalore metro region · FY2025-26
+  </div>
+
+  <div class="main-grid">
+    <!-- Input Panel -->
+    <div class="panel">
+      <div class="panel-title">Your inputs</div>
+
+      <div class="input-group">
+        <div class="input-label">Starting capital <span id="capitalDisplay">₹10,00,000</span></div>
+        <input type="range" class="slider" id="capitalSlider" min="100000" max="10000000" step="50000" value="1000000" oninput="updateCapital(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">
+          <span>₹1L</span><span>₹1Cr</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Monthly SIP top-up <span id="sipDisplay">₹10,000</span></div>
+        <input type="range" class="slider" id="sipSlider" min="0" max="100000" step="1000" value="10000" oninput="updateSIP(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">
+          <span>₹0</span><span>₹1L/mo</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-label">Time horizon <span id="yearsDisplay">10 years</span></div>
+        <input type="range" class="slider" id="yearsSlider" min="1" max="30" step="1" value="10" oninput="updateYears(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--font-mono);">
+          <span>1 yr</span><span>30 yrs</span>
+        </div>
+      </div>
+
+      <div class="panel-title" style="margin-top:0.5rem;">Methods to compare</div>
+      <div class="method-chips" id="methodChips"></div>
+
+      <button class="calc-btn" onclick="calculate()">
+        Calculate my wealth ladder
+      </button>
+    </div>
+
+    <!-- Tree Panel -->
+    <div class="tree-panel" id="treePanel">
+      <div class="panel-title" style="align-self:flex-start;">Wealth tree</div>
+      <canvas id="treeCanvas" width="340" height="280"></canvas>
+      <div id="treeCaption" style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px;font-family:var(--font-mono);">
+        Enter your inputs and calculate to see your tree grow
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div class="results-section" id="resultsSection">
+
+    <div class="summary-panel" id="summaryPanel">
+      <div class="panel-title">Summary · Best case vs conservative</div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+
+    <div class="panel-title" style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;">
+      Method breakdown — ₹ invested + ₹ gained per method
+    </div>
+    <div class="method-cards" id="methodCards"></div>
+
+    <!-- Wealth Ladder Timeline -->
+    <div class="panel" style="margin-bottom:1.5rem;">
+      <div class="panel-title">Wealth ladder — year by year</div>
+      <div id="ladderTimeline"></div>
+    </div>
+
+    <!-- Bangalore Context -->
+    <div class="panel">
+      <div class="panel-title">Bangalore growth context</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;" id="blrContext"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const METHODS = [
+  { id:'equity',  name:'Equity / Index',  rate:13,  color:'#4aa04a', badge:'badge-green', risk:'Medium', blr:'Nifty50 +13% CAGR' },
+  { id:'realty',  name:'BLR Real Estate', rate:11,  color:'#d4a843', badge:'badge-amber', risk:'High',   blr:'BLR property +11% avg' },
+  { id:'fd',      name:'FD / Debt',       rate:7.5, color:'#4a90c4', badge:'badge-blue',  risk:'Low',    blr:'SBI FD 7.5% FY26' },
+  { id:'gold',    name:'Gold / SGB',      rate:10,  color:'#c47a2a', badge:'badge-amber', risk:'Low-Med',blr:'Gold +10% INR CAGR' },
+  { id:'startup', name:'Angel / Startup', rate:22,  color:'#c45050', badge:'badge-red',   risk:'Very High',blr:'BLR startup exits' },
+  { id:'skill',   name:'Skill + Income',  rate:18,  color:'#3aaa8a', badge:'badge-green', risk:'Low',    blr:'IT salary growth BLR' },
+];
+
+const BLR_CONTEXT = [
+  { label:'IT salary growth', val:'12–18%/yr', note:'Bengaluru tech sector avg.' },
+  { label:'Property appreciation', val:'10–14%/yr', note:'Sarjapur, Whitefield, Yelahanka corridors.' },
+  { label:'Nifty 50 10-yr CAGR', val:'~13%', note:'Historical avg. including corrections.' },
+  { label:'Startup ecosystem', val:'#3 in Asia', note:'Highest angel deal density India.' },
+  { label:'Gold (INR) 10-yr', val:'~10%', note:'Rupee depreciation adds to returns.' },
+  { label:'FD / RBI bond', val:'7–7.5%', note:'SBI / PNB FD rates FY26.' },
+];
+
+let activeMethodIds = new Set(['equity','realty','fd','gold','skill']);
+let capital = 1000000, sip = 10000, years = 10;
+let treeAnimId = null;
+
+// ─── FORMATTING ─────────────────────────────────────────────────────────────
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+  if (n >= 100000)   return '₹' + (n/100000).toFixed(2) + ' L';
+  return '₹' + n.toLocaleString('en-IN');
+}
+function fmtShort(n) {
+  n = Math.round(n);
+  if (n >= 10000000) return '₹' + (n/10000000).toFixed(1) + 'Cr';
+  if (n >= 100000)   return '₹' + (n/100000).toFixed(1) + 'L';
+  return '₹' + (n/1000).toFixed(0) + 'K';
+}
+
+// ─── COMPOUND ───────────────────────────────────────────────────────────────
+function compound(p, r, n, s) {
+  let v = p;
+  for (let i = 0; i < n; i++) v = v * (1 + r/100) + s * 12;
+  return Math.round(v);
+}
+function series(p, r, n, s) {
+  let arr = [p], v = p;
+  for (let i = 0; i < n; i++) { v = v * (1 + r/100) + s * 12; arr.push(Math.round(v)); }
+  return arr;
+}
+
+// ─── INIT CHIPS ─────────────────────────────────────────────────────────────
+function initChips() {
+  const el = document.getElementById('methodChips');
+  el.innerHTML = METHODS.map(m => `
+    <button class="method-chip${activeMethodIds.has(m.id)?' active':''}" onclick="toggleMethod('${m.id}',this)" style="${activeMethodIds.has(m.id)?'background:'+m.color+';border-color:'+m.color+';color:#0a0f0a;':''}">${m.name}</button>
+  `).join('');
+}
+function toggleMethod(id, btn) {
+  if (activeMethodIds.has(id)) {
+    if (activeMethodIds.size <= 1) return;
+    activeMethodIds.delete(id);
+    btn.classList.remove('active');
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  } else {
+    activeMethodIds.add(id);
+    const m = METHODS.find(x=>x.id===id);
+    btn.classList.add('active');
+    btn.style.background = m.color;
+    btn.style.borderColor = m.color;
+    btn.style.color = '#0a0f0a';
+  }
+}
+
+// ─── SLIDER UPDATES ─────────────────────────────────────────────────────────
+function updateCapital(v) {
+  capital = +v;
+  document.getElementById('capitalDisplay').textContent = fmt(capital);
+  updateSliderFill('capitalSlider', v, 100000, 10000000);
+}
+function updateSIP(v) {
+  sip = +v;
+  document.getElementById('sipDisplay').textContent = sip === 0 ? '₹0' : fmt(sip)+'/mo';
+  updateSliderFill('sipSlider', v, 0, 100000);
+}
+function updateYears(v) {
+  years = +v;
+  document.getElementById('yearsDisplay').textContent = v + ' year' + (v>1?'s':'');
+  updateSliderFill('yearsSlider', v, 1, 30);
+}
+function updateSliderFill(id, v, min, max) {
+  const pct = ((v - min) / (max - min)) * 100;
+  const el = document.getElementById(id);
+  el.style.background = `linear-gradient(to right, #4aa04a ${pct}%, #1a221a ${pct}%)`;
+}
+
+// ─── TREE ────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('treeCanvas');
+const ctx = canvas.getContext('2d');
+let treeProgress = 0; // 0→1
+let treeStage = 0;    // 0=seed,1=sapling,2=young,3=full,4=mature
+let particles = [];
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function easeOut(t){return 1-(1-t)*(1-t);}
+
+function drawTree(progress) {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Ground
+  ctx.fillStyle = 'rgba(74,160,74,0.08)';
+  ctx.beginPath();
+  ctx.ellipse(W/2, H-8, 80, 14, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Draw based on progress
+  const p = easeOut(Math.min(progress, 1));
+
+  // Trunk
+  const trunkH = lerp(8, 90, p);
+  const trunkW = lerp(3, 10, p);
+  const trunkX = W/2, trunkY = H - 20;
+
+  ctx.strokeStyle = `rgba(${lerp(80,120,p)},${lerp(50,80,p)},${lerp(20,30,p)},${lerp(0.4,1,p)})`;
+  ctx.lineWidth = trunkW;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(trunkX, trunkY);
+  ctx.lineTo(trunkX, trunkY - trunkH);
+  ctx.stroke();
+
+  // Roots (appear early)
+  if (p > 0.15) {
+    const rp = (p - 0.15) / 0.3;
+    ctx.strokeStyle = `rgba(100,70,25,${Math.min(rp,1)*0.4})`;
+    ctx.lineWidth = 2;
+    for (let a = 0; a < 4; a++) {
+      const angle = Math.PI/2 + (a-1.5)*0.4;
+      ctx.beginPath();
+      ctx.moveTo(trunkX, trunkY);
+      ctx.lineTo(trunkX + Math.cos(angle)*lerp(0,28,Math.min(rp,1)), trunkY + Math.sin(angle)*lerp(0,14,Math.min(rp,1)));
+      ctx.stroke();
+    }
+  }
+
+  // Branches (appear after p>0.3)
+  if (p > 0.3) {
+    const bp = (p - 0.3) / 0.7;
+    drawBranch(ctx, trunkX, trunkY - trunkH, -Math.PI/2, trunkH*0.7, trunkW*0.55, bp, 0, 5);
+  }
+
+  // Leaves / canopy (appear after p>0.45)
+  if (p > 0.45) {
+    const lp = (p - 0.45) / 0.55;
+    drawCanopy(ctx, trunkX, trunkY - trunkH, lp, p);
+  }
+
+  // Particles (coins/sparkles rising) when p > 0.6
+  if (p > 0.6) {
+    updateParticles(p);
+  }
+
+  // Stage label
+  const stages = ['Seed planted','Sapling','Growing','Established','Flourishing'];
+  const si = Math.min(Math.floor(p * 5), 4);
+  ctx.fillStyle = `rgba(168,230,168,${p})`;
+  ctx.font = '11px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(stages[si], W/2, 20);
+}
+
+function drawBranch(ctx, x, y, angle, len, width, p, depth, maxDepth) {
+  if (depth >= maxDepth || len < 4) return;
+  const ep = easeOut(Math.min(p, 1));
+  const ex = x + Math.cos(angle) * len * ep;
+  const ey = y + Math.sin(angle) * len * ep;
+
+  const brown = depth < 2 ? `rgba(120,80,30,${0.8-depth*0.15})` : `rgba(80,55,20,${0.6-depth*0.1})`;
+  ctx.strokeStyle = brown;
+  ctx.lineWidth = Math.max(1, width);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(ex, ey);
+  ctx.stroke();
+
+  if (p > 0.2 && depth < maxDepth-1) {
+    const sp = (p - 0.2) / 0.8;
+    const spread = 0.45 + depth * 0.08;
+    drawBranch(ctx, ex, ey, angle - spread, len*0.68, width*0.65, sp, depth+1, maxDepth);
+    drawBranch(ctx, ex, ey, angle + spread, len*0.68, width*0.65, sp, depth+1, maxDepth);
+    if (depth < 2) {
+      drawBranch(ctx, ex, ey, angle - spread*0.4, len*0.55, width*0.5, sp*0.7, depth+1, maxDepth);
+    }
+  }
+}
+
+function drawCanopy(ctx, cx, cy, p, globalP) {
+  const ep = easeOut(p);
+  const W = canvas.width;
+  // Multiple leaf clusters
+  const clusters = [
+    {ox:0, oy:0, r:lerp(0,52,ep)},
+    {ox:-40, oy:20, r:lerp(0,38,ep)},
+    {ox:40, oy:20, r:lerp(0,38,ep)},
+    {ox:-20, oy:-28, r:lerp(0,32,ep)},
+    {ox:20, oy:-28, r:lerp(0,32,ep)},
+    {ox:0, oy:40, r:lerp(0,30,ep)},
+  ];
+  clusters.forEach((c, i) => {
+    if (c.r < 2) return;
+    const alpha = Math.min(ep * 1.4, 1);
+    const hue = 120 + Math.sin(i) * 15;
+    const light = 25 + i * 5;
+    ctx.fillStyle = `hsla(${hue},55%,${light}%,${alpha * 0.85})`;
+    ctx.beginPath();
+    ctx.arc(cx + c.ox, cy + c.oy, c.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  // Bright tip leaves
+  clusters.slice(0,3).forEach((c,i) => {
+    if (c.r < 10) return;
+    ctx.fillStyle = `rgba(109,201,109,${Math.min(ep,1)*0.6})`;
+    ctx.beginPath();
+    ctx.arc(cx + c.ox, cy + c.oy - c.r*0.3, c.r*0.45, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+function updateParticles(p) {
+  // Spawn
+  if (Math.random() < 0.15) {
+    particles.push({
+      x: canvas.width/2 + (Math.random()-0.5)*60,
+      y: canvas.height - 60 - Math.random()*60,
+      vy: -(0.4 + Math.random()*0.8),
+      vx: (Math.random()-0.5)*0.5,
+      life: 1, decay: 0.012 + Math.random()*0.01,
+      size: 3 + Math.random()*3,
+      type: Math.random() < 0.5 ? 'coin' : 'leaf'
+    });
+  }
+  particles = particles.filter(pt => pt.life > 0);
+  particles.forEach(pt => {
+    pt.x += pt.vx; pt.y += pt.vy; pt.life -= pt.decay;
+    const a = pt.life;
+    if (pt.type === 'coin') {
+      ctx.fillStyle = `rgba(212,168,67,${a*0.9})`;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = `rgba(240,200,100,${a*0.5})`;
+      ctx.beginPath();
+      ctx.arc(pt.x-1, pt.y-1, pt.size*0.5, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = `rgba(109,201,109,${a*0.7})`;
+      ctx.beginPath();
+      ctx.ellipse(pt.x, pt.y, pt.size, pt.size*0.6, pt.life*5, 0, Math.PI*2);
+      ctx.fill();
+    }
+  });
+}
+
+function animateTree(targetProgress) {
+  if (treeAnimId) cancelAnimationFrame(treeAnimId);
+  const start = treeProgress;
+  let startTime = null;
+  const dur = 2200;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    const t = Math.min((ts - startTime) / dur, 1);
+    treeProgress = start + (targetProgress - start) * easeOut(t);
+    drawTree(treeProgress);
+    if (t < 1 || treeProgress > 0.6) {
+      treeAnimId = requestAnimationFrame(step);
+    }
+  }
+  treeAnimId = requestAnimationFrame(step);
+}
+
+// keep particles going after full growth
+function keepAlive() {
+  if (treeProgress >= 0.99) {
+    drawTree(treeProgress);
+    requestAnimationFrame(keepAlive);
+  }
+}
+
+// ─── CALCULATE ──────────────────────────────────────────────────────────────
+function calculate() {
+  const active = METHODS.filter(m => activeMethodIds.has(m.id));
+  if (!active.length) return;
+
+  const totalInvested = capital + sip * 12 * years;
+  const results = active.map(m => ({
+    ...m,
+    final: compound(capital, m.rate, years, sip),
+    series: series(capital, m.rate, years, sip)
+  }));
+  results.sort((a,b) => b.final - a.final);
+
+  const best = results[0].final;
+  const worst = results[results.length-1].final;
+  const growthRatio = best / capital;
+
+  // Tree growth: map ratio to 0→1 (2x=0.4, 5x=0.7, 10x=0.85, 25x=1)
+  const treeTarget = Math.min(0.25 + Math.log2(Math.max(growthRatio,1)) / 12, 1);
+  animateTree(treeTarget);
+  setTimeout(keepAlive, 2500);
+
+  document.getElementById('treeCaption').textContent = 
+    `${fmt(capital)} grows to ${fmtShort(best)} at best · ${fmtShort(worst)} at worst`;
+
+  // Summary
+  document.getElementById('summaryGrid').innerHTML = [
+    { n: fmt(best),          l: 'Best case final',     c: '#6dc96d' },
+    { n: fmt(worst),         l: 'Conservative final',  c: '#4a90c4' },
+    { n: fmt(totalInvested), l: 'Total invested',       c: '#d4a843' },
+    { n: fmt(best - capital),l: 'Max interest earned',  c: '#3aaa8a' },
+    { n: Math.round(best / capital * 10)/10 + '×', l: 'Best multiplier', c: '#c47a2a' },
+    { n: Math.ceil(72 / results[0].rate) + ' yrs', l: 'Rule of 72 (best)', c: '#c45050' },
+  ].map(s => `
+    <div class="stat-box">
+      <div class="stat-num" style="color:${s.c}">${s.n}</div>
+      <div class="stat-lbl">${s.l}</div>
+    </div>`).join('');
+
+  // Method cards
+  document.getElementById('methodCards').innerHTML = results.map((m, idx) => {
+    const gain = m.final - totalInvested;
+    const pct = Math.round((m.final - capital) / capital * 100);
+    const barPct = Math.round(m.final / best * 100);
+    const invested = capital + sip * 12 * years;
+    const sipContrib = sip * 12 * years;
+
+    // Milestones
+    const targets = [capital*2, capital*5, capital*10];
+    const tLabels = ['2×','5×','10×'];
+    const reached = targets.map((t,i) => ({
+      label: tLabels[i],
+      yr: m.series.findIndex(v => v >= t),
+      hit: m.series.some(v => v >= t)
+    }));
+
+    return `
+    <div class="method-card${idx===0?' highlight':''}">
+      <div class="mc-top">
+        <div>
+          <div class="mc-name">${m.name}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--font-mono);">${m.rate}%/yr · ${m.risk} risk</div>
+        </div>
+        <span class="mc-badge ${m.badge}">${idx===0?'BEST':'#'+(idx+1)}</span>
+      </div>
+      <div class="mc-final">${fmt(m.final)}</div>
+      <div class="mc-gain">Gain: <span>${fmt(m.final - capital)}</span> · +${pct}%</div>
+
+      <div class="ladder-bar">
+        <div class="ladder-label">vs best case</div>
+        <div class="ladder-track">
+          <div class="ladder-fill" style="width:0%;background:${m.color};" data-target="${barPct}"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="split-row"><span class="split-color" style="background:${m.color};opacity:0.5"></span><span class="split-label">Initial capital</span><span class="split-val">${fmt(capital)}</span></div>
+        ${sip>0?`<div class="split-row"><span class="split-color" style="background:${m.color};opacity:0.3"></span><span class="split-label">SIP added (${years}yr)</span><span class="split-val">${fmt(sipContrib)}</span></div>`:''}
+        <div class="split-row"><span class="split-color" style="background:${m.color}"></span><span class="split-label">Interest / returns</span><span class="split-val" style="color:var(--green2)">${fmt(m.final - invested)}</span></div>
+      </div>
+
+      <div class="ladder-milestones">
+        ${reached.map(r => `<span class="milestone${r.hit?' reached':''}">${r.label}${r.hit&&r.yr>0?' yr '+r.yr:' —'}</span>`).join('')}
+      </div>
+
+      <div class="tooltip-text">${m.blr}</div>
+    </div>`;
+  }).join('');
+
+  // Ladder timeline
+  const maxY = Math.max(...results.map(m=>m.final));
+  const timelineYears = years <= 10 ? Array.from({length:years},(_,i)=>i+1) :
+    years <= 20 ? [2,5,10,15,years] : [2,5,10,15,20,years];
+
+  document.getElementById('ladderTimeline').innerHTML = `
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:520px;">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:6px 10px;color:var(--text3);font-family:var(--font-mono);font-size:10px;border-bottom:0.5px solid var(--border);font-weight:400;">Year</th>
+            ${results.map(m=>`<th style="text-align:right;padding:6px 10px;color:${m.color};font-family:var(--font-mono);font-size:10px;border-bottom:0.5px solid var(--border);font-weight:400;">${m.name}</th>`).join('')}
+            <th style="text-align:right;padding:6px 10px;color:var(--text3);font-family:var(--font-mono);font-size:10px;border-bottom:0.5px solid var(--border);font-weight:400;">Invested</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${timelineYears.map(y=>{
+            const invested = capital + sip*12*y;
+            return `<tr style="border-bottom:0.5px solid var(--border);">
+              <td style="padding:7px 10px;color:var(--text3);font-family:var(--font-mono);">Yr ${y}</td>
+              ${results.map(m=>`<td style="text-align:right;padding:7px 10px;font-family:var(--font-mono);color:${m.series[y]>invested*1.5?m.color:'var(--text)'};">${fmtShort(m.series[y]||m.series[m.series.length-1])}</td>`).join('')}
+              <td style="text-align:right;padding:7px 10px;font-family:var(--font-mono);color:var(--text3);">${fmtShort(invested)}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  // BLR context
+  document.getElementById('blrContext').innerHTML = BLR_CONTEXT.map(c=>`
+    <div>
+      <div style="font-family:var(--font-mono);font-size:14px;color:var(--green2);font-weight:500;">${c.val}</div>
+      <div style="font-size:12px;color:var(--text);margin:2px 0;">${c.label}</div>
+      <div style="font-size:11px;color:var(--text3);">${c.note}</div>
+    </div>`).join('');
+
+  // Show results
+  const rs = document.getElementById('resultsSection');
+  rs.classList.add('visible');
+  rs.style.display = 'block';
+
+  // Animate bars after DOM update
+  setTimeout(()=>{
+    document.querySelectorAll('.ladder-fill').forEach(el=>{
+      el.style.width = el.dataset.target + '%';
+    });
+  }, 100);
+
+  // Scroll to results
+  setTimeout(()=>rs.scrollIntoView({behavior:'smooth',block:'start'}), 200);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+initChips();
+updateSliderFill('capitalSlider', 1000000, 100000, 10000000);
+updateSliderFill('sipSlider', 10000, 0, 100000);
+updateSliderFill('yearsSlider', 10, 1, 30);
+
+// Draw seed state
+drawTree(0.05);
+// Gentle idle on load
+setTimeout(()=>animateTree(0.12), 500);
+</script>
+</body>
+</html>
